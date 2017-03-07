@@ -1,0 +1,228 @@
+<!--   -->
+<h2 class=""><a>UI API. How develope api</a></h2>
+<p>Here's our standard to create a component in javascript and Nodejs.</p>
+<p>Take a look at help.js that is the component to show this file in node js.</p>
+<p>Main.js call the component over the div</p>
+
+<h2>Contents</h2>
+<p><a href="#agreements">Develop agreements</a></p>
+<p><a href="#oliteralmodule">Client Side</a></p>
+<p><a href="#blank">Blank component</a></p>
+<p><a href="#node">Server side Node</a></p>
+<p><a href="#document">Documentation</a></p>
+
+
+
+<!-- TITLE -->
+<h3 id="agreements">Develop agreements</h3>	
+<p>For the CSS we use the follow frameworks</p>
+<p><a target='_blank' href='http://getbootstrap.com/'>bootstrap 3.3.1 </a></p>
+<p><a target='_blank' href='http://www.kubysoft.com/kubypreview/'>Admin LTE </a></p>
+<p><a target='_blank' href='http://fontawesome.io/icons/'>Font-awesome 4.6.1</a></p>
+
+<p>For javascript we use <a target='_blank' href='https://jquery.com/'>jQuery 2.1.4 </a></p>
+
+
+<!-- TITLE -->
+<h3 id="oliteralmodule">Client Side</h3>	
+<p>For the client site, we use Object literal module.</p>
+<p>You can get information all about how it works in the next play list </p>
+
+<p>Specially take a look at "Converting jQuery to an Object Literal Module" from LearnCode.academy </p>
+<p></p>
+
+<iframe id="ytplayer" type="text/html" width="640" height="360"
+  src="https://www.youtube.com/embed?listType=playlist&list=PL0_jOyazDnFxuDsvgRl9Y_BCi27hgDODp"
+  frameborder="0">
+</iframe>
+
+
+
+<!-- TITLE -->
+<h3 id="blank">Basic Blank component</h3>
+<p>This is and example how it work a blank component on the client side.</p>
+<p>This component could call the nodeJs api to get information from the server.</p>
+	
+<!-- CODE  -->
+<pre class="prettyprint prettyprinted"><code class="html">
+ 
+// BEGIN SCOPE 
+// self executing function for jquery reference. That prevents the $ is allways jquery component. 
+// W = window D= document undefined = nothing prevent undefined = true
+(function ($, W, D, undefined ) {
+// ---------------------------------------------------------
+// INTERNAL COMPONENT 
+// ------------------------------------------------------------
+var BlankComponent = {
+	// default values 
+	defaults : {
+		name: 'Default Name', 
+
+	}, // end defaults 
+
+	// SERVER CONNECTION *server *options 
+	serverOptions: {
+		hostname : "localhost", 
+    	url : "/node/help"
+
+	},
+	// CALL SERVER *server *call 
+	CallServer: function(settings, Myparams){
+	    // console.log("fn CallServer")
+	    var self = this; 
+	    var Mydiv = this.MainDiv;  
+	    if (!Myparams) { Myparams = {}}
+		var hostName = window.location.hostname; 
+		if ( this.serverOptions.hostname ) { hostName = this.serverOptions.hostname }
+		var url='http://'+ hostName + this.serverOptions.url + '/';
+		console.log("KUDABY CALL SERVER: " + url);console.log("Settings:") ; console.dir(settings); console.log("Myparams:"); console.dir(Myparams); 
+	    // NodeAjaxTime =  new Date().getTime();
+	    var MydataReturn = null; 
+	    $.ajax({
+	        type: settings.CallType,
+	        url: url,
+	        contentType: 'application/json',
+	        timeout: settings.timeout,
+	        data: Myparams  ,
+	        success: function(data) {
+	            if (settings.success) { settings.success.call(self,data);}     
+	            
+	        }, // success 
+	        error: function(jqXHR, textStatus, errorThrown) {
+	            //alert( "error" +err);
+	            var MainDiv = $('#'+Mydiv); 
+	            MainDiv.html(''); 
+	            MainDiv.AddYesNo ({
+	                type: 'warning' , title: 'Error', 
+	                description : errorThrown   , 
+	            }); 
+	        } // error 
+	         
+	    })
+	    .done(function(data) {
+	    	// console.log("done ") 
+	            if (data.error) {
+	                var verror = "error"
+	                 $('#'+Mydiv).html(verror);
+	            }else{
+	                if (settings.done) { 
+						// setTimeout(function(){ settings.success(data);  }, 100);
+						settings.success(done);
+	                }
+	            }
+			} // function 
+	    )// done 
+
+
+	},// end call server,
+	
+	
+	// CREATE A INSTANCE  *new *instance
+	create: function(options){
+		var instance = Object.create(this);
+		Object.keys(options).forEach(function(key){
+			instance[key] = options[key];
+		})
+		return instance; 
+
+	}, // end create
+
+	// INIT *init componentn  
+	init: function(options, elem){
+		// INI OBJECTS  
+		var self = this; // reference to mycomponent . 
+		self.MainDiv = $(elem); // jquery version of actual element 
+
+		// INI OPTIONS 
+		self.options = $.extend({}, self.defaults, options);
+		self.recordset = self.options.recordset; 
+
+
+
+		// CALL MAIN
+		self.HtmlInit(); 
+
+
+	},// end init
+
+	// HTML INIT  *html
+	// cacth all html an d 
+	HtmlInit: function(){
+		var self = this; 
+		self.MainDiv.append("Hello component initiated !!! "); 
+		self.divName = $("[<[div/>",{class:"container"}).appendTo(self.MainDiv)
+	}, // end htmlInit 
+
+
+	// CUSTOM FUNCTIONS 
+	sayHi: function(){
+		var self = this, op = self.options; 
+		self.divName.html('').append("Hi " + op.name)
+	}
+
+
+}// END COMPONENT 
+
+
+// ---------------------------------------------------------
+// JQUERY DECLARED FUNCTIONS 
+// ------------------------------------------------------------
+$.fn.BlankComponent = function(options){
+	// RETURN FOR EACH ELEMENT CHAINING MANTEINING 
+	return this.each(function(){
+		// this is now jquery object this.html('');
+		//var my = Object.create(jLists);
+		var my = BlankComponent.create({
+
+			// CUSTOM FUNCTIONS HERE. 
+			test:function(){
+				console.log("fn test ")
+			}
+		})
+
+		my.init(options, this);
+
+
+		// INSTANCIATE MYCOMPONENT 
+		// access to my component from outside like $('#mydiv').data('mycomponent')
+		$.data(this,'BlankComponent',my)
+
+	}); 
+	// end return FOR EACH ELEMENT CHAINING MANTEINING  
+}
+ 
+
+})(jQuery, window, document);
+// END SCOPE MYCOMPONENT  
+
+
+</code></pre> <!-- EMND CODE  -->
+
+<!-- TITLE -->
+<h3 id="component-main-header">Use the component </h3>	
+<p>After call the component in the jquery funcion, you can instantiated by  $('#element').data("name of your component") as shown in the follow example.</p>
+<p></p>
+<!-- CODE  -->
+<pre class="prettyprint prettyprinted"><code class="html">
+$('#mydiv').BlankComponent({name:"John McClane"}); 
+var Mycomponent = $('#work').data("BlankComponent"); 
+Mycomponent.sayHi(); 
+
+</code></pre> <!-- EMND CODE  -->
+
+
+
+<!-- TITLE -->
+<h3 id="node">Server side Node</h3>	
+<p>Use the index.js on the folder node </p>
+<p>Create the route you need in order to get the data from the server.</p>
+<p>On the client site, change the serverOptions object to connect at the route you want. </p>
+
+
+
+<!-- DOCUMENTATION -->
+<h3 id="document">Documentation</h3>	
+<p>Create a documentation to use the component width examples and the options to work with</p>
+<p>Use the html component.html on the ../node folder and use the same structure tha this on main.html</p>
+
+
